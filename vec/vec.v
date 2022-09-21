@@ -159,11 +159,8 @@ pub fn (mut ar Vec<T>) set_zero() {
 }
 
 pub fn (mut ar Vec<T>) free() {
-	$if !prod {
-		assert !isnil(ar.data)
-	}
-	C.free(ar.data)
-	$if !prod {
-		ar.data = &T(0)
+	if !isnil(ar.data) {
+		unsafe { C.free(ar.data) }
+		ar.data = unsafe { nil }
 	}
 }
