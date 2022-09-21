@@ -8,12 +8,6 @@ mut:
 	// elem_size int
 }
 
-pub struct Iter<T> {
-mut:
-	v   &Vec<T> [required]
-	pos usize
-}
-
 pub fn new<T>() Vec<T> {
 	return Vec<T>{
 		data: unsafe { nil }
@@ -38,22 +32,6 @@ pub fn (ar &Vec<T>) iter() Iter<T> {
 	return Iter<T>{
 		v: unsafe { ar }
 	}
-}
-
-pub fn (mut iter Iter<T>) rev() Rev<T> {
-	return Rev<T>{
-		iter: iter
-	}
-}
-
-pub fn (mut iter Iter<T>) next() ?&T {
-	if iter.pos >= iter.v.len {
-		return none
-	}
-	defer {
-		iter.pos++
-	}
-	return unsafe { &iter.v.data[iter.pos] }
 }
 
 pub fn (mut ar Vec<T>) grow_len(size usize) {
