@@ -2,24 +2,16 @@ module vec
 
 pub struct Vec<T> {
 mut:
-	data &T
-	cap  usize
-	len  usize
-	// elem_size int
-}
-
-pub struct Iter<T> {
-mut:
-	v   &Vec<T>
-	pos usize
+	data &T    [required]
+	cap  usize [required]
+	len  usize [required]
 }
 
 pub fn new<T>() Vec<T> {
 	return Vec<T>{
-		data: 0
+		data: unsafe { nil }
 		cap: 0
 		len: 0
-		// elem_size: int(sizeof(T))
 	}
 }
 
@@ -30,7 +22,6 @@ pub fn with_cap<T>(cap usize) Vec<T> {
 		data: new_data
 		cap: cap
 		len: 0
-		// elem_size: int(sizeof(T))
 	}
 }
 
@@ -40,28 +31,24 @@ pub fn (ar &Vec<T>) iter() Iter<T> {
 	}
 }
 
-pub fn (mut iter Iter<T>) next() ?&T {
-	if iter.pos >= iter.v.len {
-		return none
-	}
-	defer {
-		iter.pos++
-	}
-	return unsafe { &iter.v.data[iter.pos] }
-}
-
 pub fn (mut ar Vec<T>) grow_len(size usize) {
 	if ar.len + size > ar.cap {
-		mut new_cap := ar.cap
+		mut new_cap := if ar.cap == 0 {
+			2
+		} else {
+			ar.cap * 2
+		}
 		for new_cap < ar.len + size {
 			new_cap *= 2
 		}
-		unsafe {
-			mut new_data := C.malloc(new_cap * usize(sizeof(T)))
-			C.memcpy(new_data, ar.data, ar.len * usize(sizeof(T)))
-			C.free(ar.data)
-			ar.data = new_data
+		mut new_data := unsafe { C.malloc(new_cap * usize(sizeof(T))) }
+		if !isnil(ar.data) {
+			unsafe {
+				C.memcpy(new_data, ar.data, ar.len * usize(sizeof(T)))
+				C.free(ar.data)
+			}
 		}
+		ar.data = new_data
 		ar.cap = new_cap
 	}
 	ar.len += 1
@@ -73,7 +60,22 @@ pub fn (ar &Vec<T>) len() usize {
 }
 
 [inline]
+pub fn (ar &Vec<T>) clone() Vec<T> {
+	new_data := unsafe { C.malloc(ar.cap * usize(sizeof(T))) }
+	unsafe { C.memcpy(new_data, ar.data, ar.len * usize(sizeof(T))) }
+	return Vec<T>{
+		cap: ar.cap
+		len: ar.len
+		data: new_data
+	}
+}
+
+[inline]
 pub fn (ar &Vec<T>) get(idx usize) &T {
+	$if !prod {
+		assert idx < ar.len
+	}
+
 	return unsafe { &ar.data[idx] }
 }
 
@@ -86,11 +88,14 @@ pub fn (mut ar Vec<T>) push(elm T) {
 	ar.grow_len(1)
 	unsafe {
 		ar.data[ar.len - 1] = elm
-		// *(ar.data + (ar.len - 1) * ar.elem_size) = elm
 	}
 }
 
 pub fn (mut ar Vec<T>) insert(pos usize, elm T) {
+	$if !prod {
+		assert pos < ar.len
+	}
+
 	count := ar.len - pos
 	unsafe { ar.grow_len(1) }
 	if count > 0 {
@@ -98,29 +103,38 @@ pub fn (mut ar Vec<T>) insert(pos usize, elm T) {
 	}
 	unsafe {
 		ar.data[pos] = elm
-		// *(ar.data + pos * ar.elem_size) = elm
 	}
 }
 
 pub fn (mut ar Vec<T>) swap_remove(idx usize) T {
-	unsafe {
-		elm := ar.data[idx]
-		ar.len -= 1
-		ar.data[idx] = ar.data[ar.len]
-		return elm
+	$if !prod {
+		assert idx < ar.len
 	}
+
+	elm := unsafe { ar.data[idx] }
+	ar.len -= 1
+	unsafe {
+		ar.data[idx] = ar.data[ar.len]
+	}
+	return elm
 }
 
 pub fn (mut ar Vec<T>) remove(idx usize) T {
-	unsafe {
-		elm := ar.data[idx]
-		ar.len -= 1
-		count := ar.len - idx
-		if count > 0 {
-			vmemmove(ar.data[idx], ar.data[idx + 1], isize(count * usize(sizeof(T))))
-		}
-		return elm
+	$if !prod {
+		assert idx < ar.len
 	}
+
+	elm := unsafe { ar.data[idx] }
+	ar.len -= 1
+	count := ar.len - idx
+	if count > 0 {
+		unsafe { vmemmove(ar.data[idx], ar.data[idx + 1], isize(count * usize(sizeof(T)))) }
+	}
+	return elm
+}
+
+pub fn (mut ar Vec<T>) clear() {
+	ar.len = 0
 }
 
 // # Safety
@@ -131,6 +145,7 @@ pub fn (mut ar Vec<T>) set_len(new_len usize) {
 	$if !prod {
 		assert new_len <= ar.cap
 	}
+
 	ar.len = new_len
 }
 
@@ -139,11 +154,8 @@ pub fn (mut ar Vec<T>) set_zero() {
 }
 
 pub fn (mut ar Vec<T>) free() {
-	$if !prod {
-		assert !isnil(ar.data)
-	}
-	C.free(ar.data)
-	$if !prod {
-		ar.data = &T(0)
+	if !isnil(ar.data) {
+		unsafe { C.free(ar.data) }
+		ar.data = unsafe { nil }
 	}
 }
