@@ -5,7 +5,6 @@ mut:
 	data &T    [required]
 	cap  usize [required]
 	len  usize [required]
-	// elem_size int
 }
 
 pub fn new<T>() Vec<T> {
@@ -13,7 +12,6 @@ pub fn new<T>() Vec<T> {
 		data: unsafe { nil }
 		cap: 0
 		len: 0
-		// elem_size: int(sizeof(T))
 	}
 }
 
@@ -24,7 +22,6 @@ pub fn with_cap<T>(cap usize) Vec<T> {
 		data: new_data
 		cap: cap
 		len: 0
-		// elem_size: int(sizeof(T))
 	}
 }
 
@@ -91,7 +88,6 @@ pub fn (mut ar Vec<T>) push(elm T) {
 	ar.grow_len(1)
 	unsafe {
 		ar.data[ar.len - 1] = elm
-		// *(ar.data + (ar.len - 1) * ar.elem_size) = elm
 	}
 }
 
@@ -107,7 +103,6 @@ pub fn (mut ar Vec<T>) insert(pos usize, elm T) {
 	}
 	unsafe {
 		ar.data[pos] = elm
-		// *(ar.data + pos * ar.elem_size) = elm
 	}
 }
 
