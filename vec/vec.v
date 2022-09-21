@@ -40,6 +40,12 @@ pub fn (ar &Vec<T>) iter() Iter<T> {
 	}
 }
 
+pub fn (mut iter Iter<T>) rev() Rev<T> {
+	return Rev<T>{
+		iter: iter
+	}
+}
+
 pub fn (mut iter Iter<T>) next() ?&T {
 	if iter.pos >= iter.v.len {
 		return none
