@@ -122,6 +122,10 @@ pub fn (mut ar Vec<T>) remove(idx usize) T {
 	return elm
 }
 
+pub fn (mut ar Vec<T>) clear() {
+	ar.len = 0
+}
+
 // # Safety
 //
 // - must be `new_len <= cap`.
