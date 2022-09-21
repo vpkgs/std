@@ -36,7 +36,11 @@ pub fn (ar &Vec<T>) iter() Iter<T> {
 
 pub fn (mut ar Vec<T>) grow_len(size usize) {
 	if ar.len + size > ar.cap {
-		mut new_cap := ar.cap
+		mut new_cap := if ar.cap == 0 {
+			2
+		} else {
+			ar.cap * 2
+		}
 		for new_cap < ar.len + size {
 			new_cap *= 2
 		}
