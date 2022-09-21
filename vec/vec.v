@@ -2,21 +2,21 @@ module vec
 
 pub struct Vec<T> {
 mut:
-	data &T
-	cap  usize
-	len  usize
+	data &T    [required]
+	cap  usize [required]
+	len  usize [required]
 	// elem_size int
 }
 
 pub struct Iter<T> {
 mut:
-	v   &Vec<T>
+	v   &Vec<T> [required]
 	pos usize
 }
 
 pub fn new<T>() Vec<T> {
 	return Vec<T>{
-		data: 0
+		data: unsafe { nil }
 		cap: 0
 		len: 0
 		// elem_size: int(sizeof(T))
