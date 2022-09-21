@@ -63,6 +63,17 @@ pub fn (ar &Vec<T>) len() usize {
 }
 
 [inline]
+pub fn (ar &Vec<T>) clone() Vec<T> {
+	new_data := unsafe { C.malloc(ar.cap * usize(sizeof(T))) }
+	unsafe { C.memcpy(new_data, ar.data, ar.len * usize(sizeof(T))) }
+	return Vec<T>{
+		cap: ar.cap
+		len: ar.len
+		data: new_data
+	}
+}
+
+[inline]
 pub fn (ar &Vec<T>) get(idx usize) &T {
 	return unsafe { &ar.data[idx] }
 }
