@@ -44,12 +44,14 @@ pub fn (mut ar Vec<T>) grow_len(size usize) {
 		for new_cap < ar.len + size {
 			new_cap *= 2
 		}
-		unsafe {
-			mut new_data := C.malloc(new_cap * usize(sizeof(T)))
-			C.memcpy(new_data, ar.data, ar.len * usize(sizeof(T)))
-			C.free(ar.data)
-			ar.data = new_data
+		mut new_data := unsafe { C.malloc(new_cap * usize(sizeof(T))) }
+		if !isnil(ar.data) {
+			unsafe {
+				C.memcpy(new_data, ar.data, ar.len * usize(sizeof(T)))
+				C.free(ar.data)
+			}
 		}
+		ar.data = new_data
 		ar.cap = new_cap
 	}
 	ar.len += 1
@@ -91,24 +93,22 @@ pub fn (mut ar Vec<T>) insert(pos usize, elm T) {
 }
 
 pub fn (mut ar Vec<T>) swap_remove(idx usize) T {
+	elm := unsafe { ar.data[idx] }
+	ar.len -= 1
 	unsafe {
-		elm := ar.data[idx]
-		ar.len -= 1
 		ar.data[idx] = ar.data[ar.len]
-		return elm
 	}
+	return elm
 }
 
 pub fn (mut ar Vec<T>) remove(idx usize) T {
-	unsafe {
-		elm := ar.data[idx]
-		ar.len -= 1
-		count := ar.len - idx
-		if count > 0 {
-			vmemmove(ar.data[idx], ar.data[idx + 1], isize(count * usize(sizeof(T))))
-		}
-		return elm
+	elm := unsafe { ar.data[idx] }
+	ar.len -= 1
+	count := ar.len - idx
+	if count > 0 {
+		unsafe { vmemmove(ar.data[idx], ar.data[idx + 1], isize(count * usize(sizeof(T)))) }
 	}
+	return elm
 }
 
 // # Safety
