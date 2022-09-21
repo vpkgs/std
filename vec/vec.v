@@ -75,6 +75,10 @@ pub fn (ar &Vec<T>) clone() Vec<T> {
 
 [inline]
 pub fn (ar &Vec<T>) get(idx usize) &T {
+	$if !prod {
+		assert idx < ar.len
+	}
+
 	return unsafe { &ar.data[idx] }
 }
 
@@ -92,6 +96,10 @@ pub fn (mut ar Vec<T>) push(elm T) {
 }
 
 pub fn (mut ar Vec<T>) insert(pos usize, elm T) {
+	$if !prod {
+		assert pos < ar.len
+	}
+
 	count := ar.len - pos
 	unsafe { ar.grow_len(1) }
 	if count > 0 {
@@ -104,6 +112,10 @@ pub fn (mut ar Vec<T>) insert(pos usize, elm T) {
 }
 
 pub fn (mut ar Vec<T>) swap_remove(idx usize) T {
+	$if !prod {
+		assert idx < ar.len
+	}
+
 	elm := unsafe { ar.data[idx] }
 	ar.len -= 1
 	unsafe {
@@ -113,6 +125,10 @@ pub fn (mut ar Vec<T>) swap_remove(idx usize) T {
 }
 
 pub fn (mut ar Vec<T>) remove(idx usize) T {
+	$if !prod {
+		assert idx < ar.len
+	}
+
 	elm := unsafe { ar.data[idx] }
 	ar.len -= 1
 	count := ar.len - idx
@@ -134,6 +150,7 @@ pub fn (mut ar Vec<T>) set_len(new_len usize) {
 	$if !prod {
 		assert new_len <= ar.cap
 	}
+
 	ar.len = new_len
 }
 
