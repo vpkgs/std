@@ -109,6 +109,7 @@ pub fn (mut ar Vec<T>) insert(pos usize, elm T) {
 pub fn (mut ar Vec<T>) swap_remove(idx usize) T {
 	$if !prod {
 		assert idx < ar.len
+		assert ar.len > 0
 	}
 
 	elm := unsafe { ar.data[idx] }
@@ -122,6 +123,7 @@ pub fn (mut ar Vec<T>) swap_remove(idx usize) T {
 pub fn (mut ar Vec<T>) remove(idx usize) T {
 	$if !prod {
 		assert idx < ar.len
+		assert ar.len > 0
 	}
 
 	elm := unsafe { ar.data[idx] }
