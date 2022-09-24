@@ -99,7 +99,7 @@ pub fn (mut ar Vec<T>) insert(pos usize, elm T) {
 	count := ar.len - pos
 	unsafe { ar.grow_len(1) }
 	if count > 0 {
-		unsafe { vmemmove(ar.data[pos + 1], ar.data[pos], isize(count * usize(sizeof(T)))) }
+		unsafe { C.memmove(&ar.data[pos + 1], &ar.data[pos], isize(count * usize(sizeof(T)))) }
 	}
 	unsafe {
 		ar.data[pos] = elm
@@ -128,7 +128,7 @@ pub fn (mut ar Vec<T>) remove(idx usize) T {
 	ar.len -= 1
 	count := ar.len - idx
 	if count > 0 {
-		unsafe { vmemmove(ar.data[idx], ar.data[idx + 1], isize(count * usize(sizeof(T)))) }
+		unsafe { C.memmove(&ar.data[idx], &ar.data[idx + 1], isize(count * usize(sizeof(T)))) }
 	}
 	return elm
 }
