@@ -15,6 +15,10 @@ pub fn new<T>() Vec<T> {
 	}
 }
 
+pub fn from<T>(vec Vec<T>) Vec<T> {
+	return vec
+}
+
 pub fn with_cap<T>(cap usize) Vec<T> {
 	new_data := unsafe { C.malloc(cap * usize(sizeof(T))) }
 
