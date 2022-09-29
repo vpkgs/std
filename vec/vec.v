@@ -173,3 +173,58 @@ pub fn (mut ar Vec<T>) free() {
 		ar.data = unsafe { nil }
 	}
 }
+
+pub fn (mut ar Vec<T>) retain(cb fn (&T) bool) {
+	mut filled_len := usize(0)
+	mut hole_len := usize(0)
+
+	mut i := usize(0)
+	outer: for {
+		for cb(unsafe { &ar.data[i] }) {
+			filled_len++
+			i += 1
+			if i == ar.len {
+				break outer
+			}
+		}
+		for {
+			for !cb(unsafe { &ar.data[i] }) {
+				hole_len += 1
+				i += 1
+				if i == ar.len {
+					break outer
+				}
+			}
+			mut item_len := usize(0)
+			for cb(unsafe { &ar.data[i] }) {
+				item_len++
+				i += 1
+				if i == ar.len {
+					if hole_len >= item_len {
+						unsafe {
+							C.memcpy(&ar.data[filled_len], &ar.data[filled_len + hole_len],
+								isize(item_len * usize(sizeof(T))))
+						}
+					} else {
+						unsafe {
+							C.memmove(&ar.data[filled_len], &ar.data[filled_len + hole_len],
+								isize(item_len * usize(sizeof(T))))
+						}
+					}
+					break outer
+				}
+			}
+			if hole_len >= item_len {
+				unsafe {
+					C.memcpy(&ar.data[filled_len], &ar.data[filled_len + hole_len], isize(item_len * usize(sizeof(T))))
+				}
+			} else {
+				unsafe {
+					C.memmove(&ar.data[filled_len], &ar.data[filled_len + hole_len], isize(item_len * usize(sizeof(T))))
+				}
+			}
+			filled_len += item_len
+		}
+	}
+	ar.len -= hole_len
+}

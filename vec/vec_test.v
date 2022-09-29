@@ -1,5 +1,7 @@
 module vec
 
+import math
+
 struct Goods {
 	weight f64
 mut:
@@ -60,6 +62,32 @@ fn test_vec_swap_remove() {
 		elem := arr.swap_remove(0)
 		assert elem.price == 10.0
 		assert arr.get(0).price == 15.0
+	}
+	{
+		elem := arr.swap_remove(1)
+		assert elem.price == 11.0
+		assert arr.get(1).price == 14.0
+	}
+	{
+		elem := arr.swap_remove(1)
+		assert elem.price == 14.0
+		assert arr.get(1).price == 13.0
+	}
+	{
+		elem := arr.swap_remove(1)
+		assert elem.price == 13.0
+		assert arr.get(1).price == 16.0
+	}
+	{
+		elem := arr.swap_remove(0)
+		assert elem.price == 15.0
+		assert arr.get(0).price == 16.0
+	}
+	{
+		elem := arr.swap_remove(0)
+		assert elem.price == 16.0
+		assert arr.len() == 0
+		// assert arr.get(0).price == 15.0
 	}
 }
 
@@ -272,4 +300,59 @@ fn test_vec_str() ? {
 	// 	cap: 5
 	// 	len: 0
 	// }'
+}
+
+fn test_vec_retain__greater_than() ? {
+	mut arr := with_cap<Goods>(10)
+	arr.set_zero()
+	for i in 0 .. 10 {
+		arr.push(Goods{ price: 10.0 + i, weight: 5.0 + i })
+	}
+
+	arr.retain(fn (g &Goods) bool {
+		return g.price > 12.0
+	})
+	assert arr.len == 7
+
+	assert arr.get(2).price == 15.0
+	assert arr.get(2).weight == 10.0
+	assert arr.get(1).price == 14.0
+	assert arr.get(1).weight == 9.0
+	assert arr.get(0).price == 13.0
+	assert arr.get(0).weight == 8.0
+}
+
+fn test_vec_retain__mod_2_eq_0() ? {
+	mut arr := with_cap<Goods>(10)
+	arr.set_zero()
+	for i in 0 .. 10 {
+		arr.push(Goods{ price: 10.0 + i, weight: 5.0 + i })
+	}
+
+	arr.retain(fn (g &Goods) bool {
+		return math.mod(g.price, 2) == 0
+	})
+	assert arr.len == 5
+
+	assert arr.get(2).price == 14.0
+	assert arr.get(2).weight == 9.0
+	assert arr.get(1).price == 12.0
+	assert arr.get(1).weight == 7.0
+	assert arr.get(0).price == 10.0
+	assert arr.get(0).weight == 5.0
+}
+
+fn test_vec_retain__except_last() ? {
+	mut arr := with_cap<Goods>(10)
+	arr.set_zero()
+	for i in 0 .. 10 {
+		arr.push(Goods{ price: 10.0 + i, weight: 5.0 + i })
+	}
+
+	arr.retain(fn (g &Goods) bool {
+		return g.price != 19.0
+	})
+	assert arr.len == 9
+	assert arr.get(8).price == 18.0
+	assert arr.get(8).weight == 13.0
 }
