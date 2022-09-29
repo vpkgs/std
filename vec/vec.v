@@ -32,6 +32,11 @@ pub fn (ar &Vec<T>) iter() Iter<T> {
 }
 
 pub fn (mut ar Vec<T>) grow_len(size usize) {
+	ar.reserve(size)
+	ar.len += 1
+}
+
+pub fn (mut ar Vec<T>) reserve(size usize) {
 	if ar.len + size > ar.cap {
 		mut new_cap := if ar.cap == 0 {
 			2
@@ -51,7 +56,6 @@ pub fn (mut ar Vec<T>) grow_len(size usize) {
 		ar.data = new_data
 		ar.cap = new_cap
 	}
-	ar.len += 1
 }
 
 [inline]
@@ -85,10 +89,14 @@ pub fn (mut ar Vec<T>) pop() T {
 }
 
 pub fn (mut ar Vec<T>) push(elm T) {
-	ar.grow_len(1)
+	ar.reserve(1)
 	unsafe {
-		ar.data[ar.len - 1] = elm
+		// ar.data[ar.len - 1] = elm
+		ar.data[ar.len] = elm
+		// *(&u8(voidptr(ar.data)) + (ar.len) * usize(sizeof(T))) = voidptr(&elm)
+		// C.memcpy(&u8(ar.data) + ar.len * usize(sizeof(T)), &elm, usize(sizeof(T)))
 	}
+	ar.len += 1
 }
 
 pub fn (mut ar Vec<T>) insert(pos usize, elm T) {
