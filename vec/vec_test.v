@@ -342,6 +342,27 @@ fn test_vec_retain__mod_2_eq_0() ? {
 	assert arr.get(0).weight == 5.0
 }
 
+fn test_vec_retain__0_elem() ? {
+	mut arr := with_cap<Goods>(10)
+	arr.retain(fn (g &Goods) bool {
+		return g.price != 19.0
+	})
+	assert arr.len == 0
+}
+
+fn test_vec_retain__1_elem() ? {
+	mut arr := with_cap<Goods>(10)
+	arr.push(Goods{ price: 10.0, weight: 5.0 })
+	arr.retain(fn (g &Goods) bool {
+		return g.price != 19.0
+	})
+	assert arr.len == 1
+	arr.retain(fn (g &Goods) bool {
+		return g.price == 19.0
+	})
+	assert arr.len == 0
+}
+
 fn test_vec_retain__except_last() ? {
 	mut arr := with_cap<Goods>(10)
 	arr.set_zero()
