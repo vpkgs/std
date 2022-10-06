@@ -38,6 +38,23 @@ pub fn (ar &Vec<T>) iter() Iter<T> {
 	}
 }
 
+pub fn (mut ar Vec<T>) copy_from(src &Vec<T>) {
+	$if !prod {
+		assert ar.cap >= src.len
+	}
+	unsafe {
+		C.memcpy(ar.data, src.data, src.len * usize(sizeof(T)))
+	}
+	ar.len = src.len
+}
+pub fn (mut ar Vec<T>) copy_from_until_cap(src &Vec<T>) {
+	len := if ar.cap > src.len { src.len } else { ar.cap }
+	unsafe {
+		C.memcpy(ar.data, src.data, len * usize(sizeof(T)))
+	}
+	ar.len = len
+}
+
 pub fn (mut ar Vec<T>) grow_len(size usize) {
 	ar.reserve(size)
 	ar.len += 1
