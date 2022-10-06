@@ -20,7 +20,10 @@ pub fn from<T>(vec Vec<T>) Vec<T> {
 }
 
 pub fn with_cap<T>(cap usize) Vec<T> {
-	new_data := unsafe { C.malloc(cap * usize(sizeof(T))) }
+	$if !prod {
+		assert cap > 0
+	}
+	new_data := voidptr(unsafe { C.malloc(cap * usize(sizeof(T))) })
 
 	return Vec<T>{
 		data: new_data
@@ -50,7 +53,7 @@ pub fn (mut ar Vec<T>) reserve(size usize) {
 		for new_cap < ar.len + size {
 			new_cap *= 2
 		}
-		mut new_data := unsafe { C.malloc(new_cap * usize(sizeof(T))) }
+		mut new_data := voidptr(unsafe { C.malloc(new_cap * usize(sizeof(T))) })
 		if !isnil(ar.data) {
 			unsafe {
 				C.memcpy(new_data, ar.data, ar.len * usize(sizeof(T)))
