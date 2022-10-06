@@ -356,3 +356,16 @@ fn test_vec_retain__except_last() ? {
 	assert arr.get(8).price == 18.0
 	assert arr.get(8).weight == 13.0
 }
+
+fn test_vec_set() ? {
+	mut arr := with_cap<Goods>(5)
+	for i in 0 .. 5 {
+		arr.push(Goods{ price: 10.0 + i, weight: 5.0 + i })
+	}
+	arr.set(2, Goods{ price: 100.0, weight: 50.0 })
+	assert arr.get(2).price == 100.0
+	assert arr.get(2).weight == 50.0
+	assert arr.get(3).price == 13.0
+	assert arr.get(1).price == 11.0
+	assert arr.get(0).price == 10.0
+}

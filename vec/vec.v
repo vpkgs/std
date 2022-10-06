@@ -114,6 +114,17 @@ pub fn (ar &Vec<T>) get(idx usize) &T {
 	return unsafe { &ar.data[idx] }
 }
 
+[inline]
+pub fn (mut ar Vec<T>) set(idx usize, val T) {
+	$if !prod {
+		assert idx < ar.len
+	}
+
+	unsafe {
+		ar.data[idx] = val
+	}
+}
+
 pub fn (mut ar Vec<T>) pop() T {
 	ar.len -= 1
 	return unsafe { ar.data[ar.len] }
