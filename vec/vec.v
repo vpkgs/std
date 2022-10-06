@@ -89,7 +89,14 @@ pub fn (ar &Vec<T>) len() usize {
 
 [inline]
 pub fn (ar &Vec<T>) clone() Vec<T> {
-	new_data := unsafe { C.malloc(ar.cap * usize(sizeof(T))) }
+	if ar.cap == 0 {
+		return Vec<T>{
+			cap: 0
+			len: 0
+			data: unsafe { nil }
+		}
+	}
+	new_data := voidptr(unsafe { C.malloc(ar.cap * usize(sizeof(T))) })
 	unsafe { C.memcpy(new_data, ar.data, ar.len * usize(sizeof(T))) }
 	return Vec<T>{
 		cap: ar.cap
@@ -195,6 +202,10 @@ pub fn (mut ar Vec<T>) free() {
 }
 
 pub fn (mut ar Vec<T>) retain(cb fn (&T) bool) {
+	if ar.len == 0 {
+		return
+	}
+
 	mut filled_len := usize(0)
 	mut hole_len := usize(0)
 
