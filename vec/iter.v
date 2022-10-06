@@ -6,7 +6,7 @@ mut:
 	pos usize
 }
 
-pub fn (mut iter Iter<T>) rev() Rev<T> {
+pub fn (iter &Iter<T>) rev() Rev<T> {
 	return Rev<T>{
 		iter: iter
 	}
